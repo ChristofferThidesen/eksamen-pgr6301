@@ -13,7 +13,7 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { useState } from "react";
 
-const articles = [
+const ARTICLES = [
   {
     title: "News 1",
     article:
@@ -53,7 +53,7 @@ function FrontPage() {
 function Articles() {
   return (
     <>
-      {articles.map((m) => (
+      {ARTICLES.map((m) => (
         <div key={m.title}>
           {" "}
           <Card style={{ width: "18rem" }}>
@@ -78,7 +78,7 @@ function Articles() {
   );
 }
 
-function AddArticle() {
+function AddArticle({ onAddArticle }) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [article, setArticle] = useState("");
@@ -87,7 +87,7 @@ function AddArticle() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    articles.push({ title, date, article });
+    onAddArticle({ title, date, article });
     navigate("/");
   }
 
@@ -116,7 +116,6 @@ function AddArticle() {
         </label>
       </div>
       <button>Submit</button>
-      <pre>{JSON.stringify({ title, date, article })}</pre>
     </form>
   );
 }
@@ -129,7 +128,10 @@ function Application() {
           <Container>
             <Routes>
               <Route path="/" element={<FrontPage />} />
-              <Route path="/articles/new" element={<AddArticle />} />
+              <Route
+                path="/articles/new"
+                element={<AddArticle onAddArticle={(m) => ARTICLES.push(m)} />}
+              />
               <Route path="/articles" element={<Articles />} />
             </Routes>
           </Container>
