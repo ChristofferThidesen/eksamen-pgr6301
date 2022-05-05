@@ -11,28 +11,7 @@ import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
-import { useState } from "react";
-
-const ARTICLES = [
-  {
-    title: "News 1",
-    article:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    date: "05 / 04 / 2022",
-  },
-  {
-    title: "News 2",
-    article:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    date: "05 / 04 / 2022",
-  },
-  {
-    title: "News 3",
-    article:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    date: "05 / 04 / 2022",
-  },
-];
+import { useState, useEffect } from "react";
 
 function FrontPage() {
   return (
@@ -50,7 +29,18 @@ function FrontPage() {
   );
 }
 
-function Articles() {
+function ListArticles({ articleApi }) {
+  const [articles, setArticles] = useState();
+
+  useEffect(async () => {
+    setArticles(undefined);
+    setArticles(await articleApi.listArticels());
+  }, []);
+
+  if (!articles) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       {ARTICLES.map((m) => (
@@ -78,16 +68,16 @@ function Articles() {
   );
 }
 
-function AddArticle({ onAddArticle }) {
+function AddArticle({ articleApi }) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [article, setArticle] = useState("");
 
   const navigate = useNavigate();
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    onAddArticle({ title, date, article });
+    await articleApi.onAddArticle({ title, date, article });
     navigate("/");
   }
 
@@ -121,6 +111,11 @@ function AddArticle({ onAddArticle }) {
 }
 
 function Application() {
+  const articleApi = {
+    onAddArticle: async (m) => ARTICLES.push(m),
+    listArticels: async () => ARTICLES,
+  };
+
   return (
     <>
       <BrowserRouter>
@@ -130,9 +125,12 @@ function Application() {
               <Route path="/" element={<FrontPage />} />
               <Route
                 path="/articles/new"
-                element={<AddArticle onAddArticle={(m) => ARTICLES.push(m)} />}
+                element={<AddArticle articleApi={articleApi} />}
               />
-              <Route path="/articles" element={<Articles />} />
+              <Route
+                path="/articles"
+                element={<ListArticles articleApi={articleApi} />}
+              />
             </Routes>
           </Container>
         </Navbar>
